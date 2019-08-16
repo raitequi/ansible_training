@@ -1,0 +1,51 @@
+  - name: 'Instalando programas na maquina BD... isso pode demorar um pouco'
+    apt:
+      update_cache: yes
+      name:
+        - mysql-server-5.7
+        - python3-mysqldb
+      state: latest
+    become: yes
+
+  - name: 'Criando banco no MySQL...'
+    mysql_db:
+      name: "{{ wp_db_nome }}"
+      login_user: root
+      state: present
+    become: yes
+
+  - name: 'Criando usuario no MySQL...'
+    mysql_user:
+      login_user: root
+      name: "{{ wp_user_nome }}"
+      password: "{{ wp_user_pass }}"
+      priv: '*.*:ALL' #base_de_dados.tabela:privilegio
+      host: '%'
+      state: present
+      host: "{{ item }}"
+    with_items:
+      - 'localhost'
+      - '127.0.0.1'
+      - "{{ wp_host_ip }}"
+    become: yes
+
+  - name: 'Copiando arquivo mysqld.cnf'
+    template:
+      src: templates/mysqld.cnf.j2
+      dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+      owner: root
+      group: root
+      mode: 0644
+    become: yes
+
+  - name: 'Copiando arquivo my.cnf'
+    template:
+      src: templates/my.cnf
+      dest: /etc/mysql/my.cnf
+      owner: root
+      group: root
+      mode: 0644
+    become: yes
+
+    notify:
+      - restart mysql

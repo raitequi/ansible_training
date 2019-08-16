@@ -1,0 +1,15 @@
+[wordpress]
+vagrant@192.168.15.241
+
+[mysqlserver]
+vagrant@192.168.15.242
+
+[wordpress:vars]
+ansibleuser=asuspc
+ansible_ssh_private_key_file=/home/asuspc/vagrant_teste/bionic/maquina_ansible/id_rsa
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[mysqlserver:vars]
+ansibleuser=asuspc
+ansible_ssh_private_key_file=/home/asuspc/vagrant_teste/bionic/maquina_ansible/id_rsa
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

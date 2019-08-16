@@ -1,0 +1,42 @@
+  - name: 'Baixando Wordpress...'
+    get_url:
+      url: https://wordpress.org/latest.tar.gz
+      dest: /tmp/wordpress.tar.gz
+
+  - name: 'Extraindo Wordpress...'
+    unarchive:
+      src: /tmp/wordpress.tar.gz
+      dest: /var/www
+      remote_src: yes
+    become: yes
+
+  - name: 'Mudando nome do arquivo wp-config-sample.php para wp-config.php'
+    copy:
+      src: "{{ wp_instalacao_dir }}/wp-config-sample.php"
+      dest: "{{ wp_instalacao_dir }}/wp-config.php"
+      remote_src: yes #origem remota. Se não declarado, é local
+    become: yes
+
+  - name: 'Configurando o wp-config com as entradas do banco...'
+    replace:
+      path: "{{ wp_instalacao_dir }}/wp-config.php"
+      regexp: 'regex'
+      replace: 'value'
+      backup: yes
+    with_items:
+      - { regex: 'database_name_here', value: "{{ wp_db_nome }}"}
+      - { regex: 'username_here', value: "{{ wp_user_nome }}"}
+      - { regex: 'password_here', value: "{{ wp_user_pass }}"}
+      - { regex: 'localhost', value: "{{ wp_db_ip }}"}
+    become: yes
+
+  - name: 'Copiando arquivo default de configuração do Apache...'
+    template:
+      src: templates/000-default.conf.j2
+      dest: /etc/apache2/sites-available/000-default.conf
+      owner: root
+      group: root
+      mode: 0644
+    become: yes
+    notify:
+      - restart apache
